@@ -159,6 +159,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .pdf-close-btn{position:fixed;top:24px;right:24px;padding:10px 18px;background:#1D9E75;border:none;border-radius:8px;color:#fff;font-size:13px;cursor:pointer;z-index:1001}
 .pdf-print-btn{position:fixed;top:24px;right:140px;padding:10px 18px;background:#185FA5;border:none;border-radius:8px;color:#fff;font-size:13px;cursor:pointer;z-index:1001}
 
+
+/* Nivel upload rows */
+.nivel-upload-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.nivel-label{display:flex;align-items:center;gap:8px;font-size:13px;color:#444;width:120px;flex-shrink:0}
+.nivel-num{background:#185FA5;color:#fff;border-radius:6px;padding:2px 7px;font-size:11px;font-weight:600}
+.nivel-dropzone{flex:1;border:1.5px dashed #ddd;border-radius:10px;padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all .2s;background:#fafafa;min-height:48px}
+.nivel-dropzone:hover,.nivel-dropzone.drag{border-color:#185FA5;background:#E6F1FB}
+.nivel-dropzone.has-file{border-color:#1D9E75;background:#E1F5EE;border-style:solid}
+.nivel-drop-icon{font-size:20px;flex-shrink:0}
+.nivel-drop-text{font-size:12px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nivel-dropzone.has-file .nivel-drop-text{color:#085041;font-weight:500}
+.nivel-preview{height:36px;width:auto;border-radius:4px;object-fit:cover}
+.nivel-clear-btn{padding:4px 8px;border:1px solid #ddd;border-radius:6px;background:#FCEBEB;color:#A32D2D;cursor:pointer;font-size:12px;flex-shrink:0}
+
 @media(max-width:520px){.grid2{grid-template-columns:1fr}.btn-row{flex-direction:column}}
 @media print{body{background:#fff}.page{padding:0;max-width:100%}.tabs,.btn-row,.action-btns,.header,.add-servicio-form{display:none!important}.pane{display:none!important}#pdf-preview{display:block!important;position:static;background:none;padding:0}.pdf-doc{box-shadow:none}.pdf-close-btn,.pdf-print-btn{display:none!important}}
 </style>
@@ -318,26 +332,84 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </div>
       <div class="field" style="margin-top:10px"><label>Notas adicionales</label><input type="text" id="p-notas" placeholder="Ej. incluir impermeabilizacion..."></div>
     </div>
+
     <div class="sec">
-      <div class="sec-title">Subir plano</div>
-      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFile(event)">
-        <div class="upload-icon">📐</div>
-        <div class="upload-title" id="uploadTitle">Haz clic o arrastra tu plano aqui</div>
-        <div class="upload-sub">JPG, PNG, WEBP o PDF — max 10 MB</div>
-        <img id="uploadPreview" class="upload-preview">
+      <div class="sec-title">
+        <span>Planos por nivel</span>
+        <span style="font-size:11px;color:#1D9E75;font-weight:400" id="planosCount">0 planos cargados</span>
       </div>
-      <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,application/pdf" style="display:none" onchange="fileSelected(event)">
+      <div style="font-size:12px;color:#888;margin-bottom:12px">Sube un plano por cada nivel. Minimo 1, maximo 5.</div>
+
+      <div id="nivelesContainer">
+        <!-- Nivel PB siempre visible -->
+        <div class="nivel-upload-row" id="row-pb">
+          <div class="nivel-label"><span class="nivel-num">PB</span> Planta Baja</div>
+          <div class="nivel-dropzone" id="zone-pb" onclick="triggerFileNivel('pb')" ondragover="dragOverNivel(event,'pb')" ondragleave="dragLeaveNivel('pb')" ondrop="dropFileNivel(event,'pb')">
+            <span class="nivel-drop-icon">📄</span>
+            <span class="nivel-drop-text" id="text-pb">Haz clic o arrastra</span>
+            <img id="prev-pb" class="nivel-preview" style="display:none">
+          </div>
+          <button class="nivel-clear-btn" id="clear-pb" onclick="clearNivel('pb')" style="display:none">✕</button>
+          <input type="file" id="file-pb" accept="image/jpeg,image/png,image/webp,application/pdf" style="display:none" onchange="fileNivelSelected(event,'pb')">
+        </div>
+
+        <div class="nivel-upload-row" id="row-pa">
+          <div class="nivel-label"><span class="nivel-num">PA</span> Planta Alta</div>
+          <div class="nivel-dropzone" id="zone-pa" onclick="triggerFileNivel('pa')" ondragover="dragOverNivel(event,'pa')" ondragleave="dragLeaveNivel('pa')" ondrop="dropFileNivel(event,'pa')">
+            <span class="nivel-drop-icon">📄</span>
+            <span class="nivel-drop-text" id="text-pa">Haz clic o arrastra</span>
+            <img id="prev-pa" class="nivel-preview" style="display:none">
+          </div>
+          <button class="nivel-clear-btn" id="clear-pa" onclick="clearNivel('pa')" style="display:none">✕</button>
+          <input type="file" id="file-pa" accept="image/jpeg,image/png,image/webp,application/pdf" style="display:none" onchange="fileNivelSelected(event,'pa')">
+        </div>
+
+        <div class="nivel-upload-row" id="row-p2">
+          <div class="nivel-label"><span class="nivel-num">N3</span> Nivel 3</div>
+          <div class="nivel-dropzone" id="zone-p2" onclick="triggerFileNivel('p2')" ondragover="dragOverNivel(event,'p2')" ondragleave="dragLeaveNivel('p2')" ondrop="dropFileNivel(event,'p2')">
+            <span class="nivel-drop-icon">📄</span>
+            <span class="nivel-drop-text" id="text-p2">Haz clic o arrastra</span>
+            <img id="prev-p2" class="nivel-preview" style="display:none">
+          </div>
+          <button class="nivel-clear-btn" id="clear-p2" onclick="clearNivel('p2')" style="display:none">✕</button>
+          <input type="file" id="file-p2" accept="image/jpeg,image/png,image/webp,application/pdf" style="display:none" onchange="fileNivelSelected(event,'p2')">
+        </div>
+
+        <div class="nivel-upload-row" id="row-p3">
+          <div class="nivel-label"><span class="nivel-num">N4</span> Nivel 4</div>
+          <div class="nivel-dropzone" id="zone-p3" onclick="triggerFileNivel('p3')" ondragover="dragOverNivel(event,'p3')" ondragleave="dragLeaveNivel('p3')" ondrop="dropFileNivel(event,'p3')">
+            <span class="nivel-drop-icon">📄</span>
+            <span class="nivel-drop-text" id="text-p3">Haz clic o arrastra</span>
+            <img id="prev-p3" class="nivel-preview" style="display:none">
+          </div>
+          <button class="nivel-clear-btn" id="clear-p3" onclick="clearNivel('p3')" style="display:none">✕</button>
+          <input type="file" id="file-p3" accept="image/jpeg,image/png,image/webp,application/pdf" style="display:none" onchange="fileNivelSelected(event,'p3')">
+        </div>
+
+        <div class="nivel-upload-row" id="row-p4">
+          <div class="nivel-label"><span class="nivel-num">N5</span> Nivel 5</div>
+          <div class="nivel-dropzone" id="zone-p4" onclick="triggerFileNivel('p4')" ondragover="dragOverNivel(event,'p4')" ondragleave="dragLeaveNivel('p4')" ondrop="dropFileNivel(event,'p4')">
+            <span class="nivel-drop-icon">📄</span>
+            <span class="nivel-drop-text" id="text-p4">Haz clic o arrastra</span>
+            <img id="prev-p4" class="nivel-preview" style="display:none">
+          </div>
+          <button class="nivel-clear-btn" id="clear-p4" onclick="clearNivel('p4')" style="display:none">✕</button>
+          <input type="file" id="file-p4" accept="image/jpeg,image/png,image/webp,application/pdf" style="display:none" onchange="fileNivelSelected(event,'p4')">
+        </div>
+      </div>
     </div>
-    <button class="btn-plano" id="btnPlano" onclick="analizarPlano()" disabled>Analizar plano y generar cotizacion</button>
+
+    <button class="btn-plano" id="btnPlano" onclick="analizarPlanos()" disabled>Analizar planos y generar cotizacion consolidada</button>
     <div class="err" id="errPlano"></div>
+
     <div class="analisis-card" id="analisisCard">
-      <div style="font-size:12px;font-weight:600;color:#0C447C;text-transform:uppercase;margin-bottom:10px">Analisis del plano</div>
-      <div class="analisis-grid" id="analisisGrid"></div>
-      <div id="analisisConfianza"></div>
-      <div style="font-size:12px;color:#185FA5;margin-top:8px" id="analisisObs"></div>
+      <div style="font-size:12px;font-weight:600;color:#0C447C;text-transform:uppercase;margin-bottom:10px">Analisis por nivel</div>
+      <div id="analisisNiveles"></div>
+      <div style="margin-top:10px;padding:10px;background:#fff;border-radius:8px" id="analisisConsolidado"></div>
     </div>
+
     <div class="result-box" id="resultPlano">
-      <div class="result-title">Cotizacion desde plano</div>
+      <div class="result-title">Cotizacion consolidada desde planos</div>
       <div class="streaming" id="streamPlano"></div>
       <div class="total-card" id="totalPlano" style="display:none">
         <span class="total-label">Total estimado</span>
@@ -801,6 +873,111 @@ async function analizarPlano(){
   }catch(e){const err=document.getElementById('errPlano');err.textContent='Error: '+e.message;err.style.display='block';}
   btn.disabled=false;btn.innerHTML='Analizar plano y generar cotizacion';
 }
+
+// ── Multi-plano por nivel ─────────────────────────────────────────────────────
+const NIVELES = ['pb','pa','p2','p3','p4'];
+const nivelFiles = {};
+
+function triggerFileNivel(nv){document.getElementById('file-'+nv).click();}
+function dragOverNivel(e,nv){e.preventDefault();document.getElementById('zone-'+nv).classList.add('drag');}
+function dragLeaveNivel(nv){document.getElementById('zone-'+nv).classList.remove('drag');}
+function dropFileNivel(e,nv){e.preventDefault();dragLeaveNivel(nv);const f=e.dataTransfer.files[0];if(f)setNivelFile(nv,f);}
+function fileNivelSelected(e,nv){const f=e.target.files[0];if(f)setNivelFile(nv,f);}
+
+function setNivelFile(nv, file){
+  nivelFiles[nv] = file;
+  const zone=document.getElementById('zone-'+nv);
+  const text=document.getElementById('text-'+nv);
+  const prev=document.getElementById('prev-'+nv);
+  const clearBtn=document.getElementById('clear-'+nv);
+  zone.classList.add('has-file');
+  text.textContent=file.name;
+  clearBtn.style.display='block';
+  if(file.type.startsWith('image/')){prev.src=URL.createObjectURL(file);prev.style.display='block';}
+  else{prev.style.display='none';}
+  updatePlanosCount();
+}
+
+function clearNivel(nv){
+  delete nivelFiles[nv];
+  document.getElementById('zone-'+nv).classList.remove('has-file');
+  document.getElementById('text-'+nv).textContent='Haz clic o arrastra';
+  document.getElementById('prev-'+nv).style.display='none';
+  document.getElementById('clear-'+nv).style.display='none';
+  document.getElementById('file-'+nv).value='';
+  updatePlanosCount();
+}
+
+function updatePlanosCount(){
+  const n=Object.keys(nivelFiles).length;
+  document.getElementById('planosCount').textContent=n+' plano'+(n!==1?'s':'')+' cargado'+(n!==1?'s':'');
+  document.getElementById('btnPlano').disabled=n===0;
+}
+
+async function analizarPlanos(){
+  const nivesConArchivo=Object.keys(nivelFiles);
+  if(!nivesConArchivo.length) return;
+  const btn=document.getElementById('btnPlano');
+  btn.disabled=true;
+  btn.innerHTML='<span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span> Analizando '+nivesConArchivo.length+' plano(s)...';
+  document.getElementById('errPlano').style.display='none';
+  document.getElementById('analisisCard').classList.remove('visible');
+  document.getElementById('resultPlano').classList.remove('visible');
+
+  const fd=new FormData();
+  fd.append('nombre_cliente',document.getElementById('p-cliente').value);
+  fd.append('nombre_obra',document.getElementById('p-obra').value);
+  fd.append('ubicacion',document.getElementById('p-ubicacion').value||'Ciudad de Mexico');
+  fd.append('plazo',document.getElementById('p-plazo').value);
+  fd.append('notas_adicionales',document.getElementById('p-notas').value);
+  const nivelKeys={pb:'archivo_pb',pa:'archivo_pa',p2:'archivo_p2',p3:'archivo_p3',p4:'archivo_p4'};
+  for(const nv of NIVELES){
+    if(nivelFiles[nv]) fd.append(nivelKeys[nv], nivelFiles[nv]);
+  }
+
+  try{
+    const r=await fetch(API+'/cotizar/planos',{method:'POST',headers:{'Authorization':'Bearer '+TOKEN},body:fd});
+    const data=await r.json();
+    if(data.detail) throw new Error(data.detail);
+
+    // Mostrar analisis por nivel
+    const niveles=data.analisis_por_nivel||[];
+    document.getElementById('analisisNiveles').innerHTML=`
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-bottom:10px">
+        ${niveles.map(a=>`
+          <div style="background:#fff;border-radius:8px;padding:10px;border:1px solid #e5e5e3">
+            <div style="font-size:11px;font-weight:600;color:#185FA5;margin-bottom:6px">${a.nivel}</div>
+            <div style="font-size:12px;color:#444">${a.metros_cuadrados_totales||0} m²</div>
+            <div style="font-size:11px;color:#888">${(a.habitaciones?.recamaras||0)} rec · ${(a.habitaciones?.banos||0)} baños</div>
+            ${a.error?`<div style="font-size:10px;color:#A32D2D;margin-top:4px">⚠ ${a.error}</div>`:''}
+          </div>`).join('')}
+      </div>`;
+
+    const cons=data.consolidado||{};
+    document.getElementById('analisisConsolidado').innerHTML=`
+      <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:13px">
+        <div><span style="color:#888;font-size:11px">Total m²</span><div style="font-weight:500">${cons.metros_totales||0} m²</div></div>
+        <div><span style="color:#888;font-size:11px">Niveles</span><div style="font-weight:500">${cons.niveles||0}</div></div>
+        <div style="flex:1"><span style="color:#888;font-size:11px">Trabajos</span><div style="font-size:12px">${(cons.trabajos||[]).join(', ')||'-'}</div></div>
+      </div>`;
+    document.getElementById('analisisCard').classList.add('visible');
+
+    document.getElementById('streamPlano').textContent=data.cotizacion||'';
+    if(data.total_estimado){
+      document.getElementById('totalValPlano').textContent=data.total_estimado;
+      document.getElementById('totalPlano').style.display='flex';
+    }
+    document.getElementById('resultPlano').classList.add('visible');
+
+  }catch(e){
+    const err=document.getElementById('errPlano');
+    err.textContent='Error: '+e.message;
+    err.style.display='block';
+  }
+  btn.disabled=false;
+  btn.innerHTML='Analizar planos y generar cotizacion consolidada';
+}
+
 </script>
 </body>
 </html>
