@@ -334,6 +334,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
 
     <div class="sec">
+      <div class="sec-title">Alcance del trabajo a cotizar</div>
+      <div style="font-size:12px;color:#888;margin-bottom:10px">Selecciona que trabajos incluir en la cotizacion. Si no seleccionas ninguno se cotiza todo lo del plano.</div>
+      <div class="tags" id="p-tipos">
+        <span class="tag" data-v="obra civil y cimentacion">Obra civil</span>
+        <span class="tag" data-v="obra gris">Obra gris</span>
+        <span class="tag" data-v="instalaciones hidraulicas y sanitarias">Hidraulico/Sanitario</span>
+        <span class="tag" data-v="instalaciones electricas">Electrico</span>
+        <span class="tag" data-v="instalaciones de gas">Gas</span>
+        <span class="tag" data-v="acabados interiores">Acabados interiores</span>
+        <span class="tag" data-v="acabados exteriores">Acabados exteriores</span>
+        <span class="tag" data-v="herreria y canceleria">Herreria/Canceleria</span>
+        <span class="tag" data-v="pintura">Pintura</span>
+        <span class="tag" data-v="impermeabilizacion">Impermeabilizacion</span>
+      </div>
+    </div>
+
+    <div class="sec">
       <div class="sec-title">
         <span>Planos por nivel</span>
         <span style="font-size:11px;color:#1D9E75;font-weight:400" id="planosCount">0 planos cargados</span>
@@ -586,6 +603,7 @@ function getSvNombres(){const s=getSelectedServicios(),all=[...CATALOGO_BASE.fla
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 document.querySelectorAll('#tipos .tag').forEach(t=>t.addEventListener('click',()=>t.classList.toggle('active')));
+document.querySelectorAll('#p-tipos .tag').forEach(t=>t.addEventListener('click',()=>t.classList.toggle('active')));
 
 function switchTab(t){
   ['form','plano','hist','admin'].forEach(id=>{
@@ -852,7 +870,11 @@ async function analizarPlano(){
   fd.append('nombre_obra',document.getElementById('p-obra').value);
   fd.append('ubicacion',document.getElementById('p-ubicacion').value||'Ciudad de Mexico');
   fd.append('plazo',document.getElementById('p-plazo').value);
-  fd.append('notas_adicionales',document.getElementById('p-notas').value);
+  const pTipos=[...document.querySelectorAll('#p-tipos .tag.active')].map(e=>e.dataset.v);
+  const notasConAlcance = pTipos.length > 0 
+    ? 'ALCANCE SOLICITADO: '+pTipos.join(', ')+'. '+(document.getElementById('p-notas').value||'')
+    : document.getElementById('p-notas').value;
+  fd.append('notas_adicionales', notasConAlcance);
   try{
     const r=await fetch(API+'/cotizar/plano',{method:'POST',headers:{'Authorization':'Bearer '+TOKEN},body:fd});
     const data=await r.json();
@@ -929,7 +951,11 @@ async function analizarPlanos(){
   fd.append('nombre_obra',document.getElementById('p-obra').value);
   fd.append('ubicacion',document.getElementById('p-ubicacion').value||'Ciudad de Mexico');
   fd.append('plazo',document.getElementById('p-plazo').value);
-  fd.append('notas_adicionales',document.getElementById('p-notas').value);
+  const pTipos=[...document.querySelectorAll('#p-tipos .tag.active')].map(e=>e.dataset.v);
+  const notasConAlcance = pTipos.length > 0 
+    ? 'ALCANCE SOLICITADO: '+pTipos.join(', ')+'. '+(document.getElementById('p-notas').value||'')
+    : document.getElementById('p-notas').value;
+  fd.append('notas_adicionales', notasConAlcance);
   const nivelKeys={pb:'archivo_pb',pa:'archivo_pa',p2:'archivo_p2',p3:'archivo_p3',p4:'archivo_p4'};
   for(const nv of NIVELES){
     if(nivelFiles[nv]) fd.append(nivelKeys[nv], nivelFiles[nv]);
