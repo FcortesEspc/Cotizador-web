@@ -602,8 +602,8 @@ function updateSvPreview(){
 function getSvNombres(){const s=getSelectedServicios(),all=[...CATALOGO_BASE.flatMap(g=>g.items),...getCustomServicios()];return s.map(id=>all.find(i=>i.id===id)?.nombre||id);}
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
-document.querySelectorAll('#tipos .tag').forEach(t=>t.addEventListener('click',(e)=>{e.stopPropagation();t.classList.toggle('active');}));
-document.querySelectorAll('#p-tipos .tag').forEach(t=>t.addEventListener('click',(e)=>{e.stopPropagation();t.classList.toggle('active');}));
+document.querySelectorAll('#tipos .tag').forEach(function(tag){tag.addEventListener('click',function(e){e.stopPropagation();tag.classList.toggle('active');});});
+document.querySelectorAll('#p-tipos .tag').forEach(function(tag){tag.addEventListener('click',function(e){e.stopPropagation();tag.classList.toggle('active');});});
 
 function switchTab(t, el){
   ['form','plano','hist','admin'].forEach(id=>{
