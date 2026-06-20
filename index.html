@@ -239,10 +239,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 
   <div class="tabs" id="mainTabs">
-    <div class="tab active" onclick="switchTab('form')">Nueva cotizacion</div>
-    <div class="tab" onclick="switchTab('plano')">Analizar plano <span style="background:#185FA5;color:#fff;font-size:10px;padding:1px 7px;border-radius:20px;margin-left:4px">IA</span></div>
-    <div class="tab" onclick="switchTab('hist')">Historial <span class="cnt" id="histCnt">0</span></div>
-    <div class="tab" id="adminTab" style="display:none" onclick="switchTab('admin')">Admin</div>
+    <div class="tab active" onclick="switchTab('form',this)">Nueva cotizacion</div>
+    <div class="tab" onclick="switchTab('plano',this)">Analizar plano <span style="background:#185FA5;color:#fff;font-size:10px;padding:1px 7px;border-radius:20px;margin-left:4px">IA</span></div>
+    <div class="tab" onclick="switchTab('hist',this)">Historial <span class="cnt" id="histCnt">0</span></div>
+    <div class="tab" id="adminTab" style="display:none" onclick="switchTab('admin',this)">Admin</div>
   </div>
 
   <!-- FORM -->
@@ -602,16 +602,17 @@ function updateSvPreview(){
 function getSvNombres(){const s=getSelectedServicios(),all=[...CATALOGO_BASE.flatMap(g=>g.items),...getCustomServicios()];return s.map(id=>all.find(i=>i.id===id)?.nombre||id);}
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
-document.querySelectorAll('#tipos .tag').forEach(t=>t.addEventListener('click',()=>t.classList.toggle('active')));
-document.querySelectorAll('#p-tipos .tag').forEach(t=>t.addEventListener('click',()=>t.classList.toggle('active')));
+document.querySelectorAll('#tipos .tag').forEach(t=>t.addEventListener('click',(e)=>{e.stopPropagation();t.classList.toggle('active');}));
+document.querySelectorAll('#p-tipos .tag').forEach(t=>t.addEventListener('click',(e)=>{e.stopPropagation();t.classList.toggle('active');}));
 
-function switchTab(t){
+function switchTab(t, el){
   ['form','plano','hist','admin'].forEach(id=>{
     const p=document.getElementById('pane-'+id);
     if(p) p.classList.toggle('active',id===t);
   });
-  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
-  event.target.classList.add('active');
+  document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));
+  if(el) el.classList.add('active');
+  else { const tabs=document.querySelectorAll('.tab'); const idx=['form','plano','hist','admin'].indexOf(t); if(tabs[idx]) tabs[idx].classList.add('active'); }
   if(t==='hist') cargarHistorial();
   if(t==='admin') cargarUsuarios();
 }
@@ -900,7 +901,7 @@ async function analizarPlano(){
 const NIVELES = ['pb','pa','p2','p3','p4'];
 const nivelFiles = {};
 
-function triggerFileNivel(nv){document.getElementById('file-'+nv).click();}
+function triggerFileNivel(nv){document.getElementById('file-'+nv).click();} 
 function dragOverNivel(e,nv){e.preventDefault();document.getElementById('zone-'+nv).classList.add('drag');}
 function dragLeaveNivel(nv){document.getElementById('zone-'+nv).classList.remove('drag');}
 function dropFileNivel(e,nv){e.preventDefault();dragLeaveNivel(nv);const f=e.dataTransfer.files[0];if(f)setNivelFile(nv,f);}
